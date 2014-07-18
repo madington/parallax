@@ -288,7 +288,7 @@
         window.addEventListener('mousemove', this.onMouseMove);
       }
       window.top.addEventListener('resize', this.onWindowResize);
-      this.raf = requestAnimationFrame(this.onAnimationFrame);
+      this.raf = nextFrame(this.onAnimationFrame);
     }
   };
 
@@ -301,7 +301,7 @@
         window.removeEventListener('mousemove', this.onMouseMove);
       }
       window.top.removeEventListener('resize', this.onWindowResize);
-      cancelAnimationFrame(this.raf);
+      cancelFrame(this.raf);
     }
   };
 
@@ -425,7 +425,7 @@
       var yOffset = this.vy * depth * (this.invertY ? -1 : 1);
       this.setPosition(layer, xOffset, yOffset);
     }
-    this.raf = requestAnimationFrame(this.onAnimationFrame);
+    this.raf = nextFrame(this.onAnimationFrame);
   };
 
   Parallax.prototype.onDeviceOrientation = function(event) {
