@@ -225,8 +225,8 @@
   };
 
   Plugin.prototype.updateDimensions = function() {
-    this.ww = window.innerWidth;
-    this.wh = window.innerHeight;
+    this.ww = window.top.innerWidth;
+    this.wh = window.top.innerHeight;
     this.wcx = this.ww * this.originX;
     this.wcy = this.wh * this.originY;
     this.wrx = Math.max(this.wcx, this.ww - this.wcx);
@@ -234,7 +234,7 @@
   };
 
   Plugin.prototype.updateBounds = function() {
-    this.bounds = this.element.getBoundingClientRect();
+    this.bounds = window.frameElement ? window.frameElement.getBoundingClientRect() : this.element.getBoundingClientRect();
     this.ex = this.bounds.left;
     this.ey = this.bounds.top;
     this.ew = this.bounds.width;
@@ -263,7 +263,7 @@
         this.portrait = false;
         window.addEventListener('mousemove', this.onMouseMove);
       }
-      window.addEventListener('resize', this.onWindowResize);
+      window.top.addEventListener('resize', this.onWindowResize);
       this.raf = requestAnimationFrame(this.onAnimationFrame);
     }
   };
@@ -276,7 +276,7 @@
       } else {
         window.removeEventListener('mousemove', this.onMouseMove);
       }
-      window.removeEventListener('resize', this.onWindowResize);
+      window.top.removeEventListener('resize', this.onWindowResize);
       cancelAnimationFrame(this.raf);
     }
   };

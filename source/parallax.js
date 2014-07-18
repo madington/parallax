@@ -249,8 +249,8 @@
   };
 
   Parallax.prototype.updateDimensions = function() {
-    this.ww = window.frameElement ? window.top.innerWidth : window.innerWidth;
-    this.wh = window.frameElement ? window.top.innerHeight : window.innerHeight;
+    this.ww = window.top.innerWidth;
+    this.wh = window.top.innerHeight;
     this.wcx = this.ww * this.originX;
     this.wcy = this.wh * this.originY;
     this.wrx = Math.max(this.wcx, this.ww - this.wcx);
