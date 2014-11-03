@@ -226,6 +226,14 @@
     }
     return featureSupport;
   };
+  
+  Parallax.prototype.inIframe = function() {
+      try {
+          return window.self !== window.top;
+      } catch (e) {
+          return true;
+      }
+  };
 
   Parallax.prototype.ww = null;
   Parallax.prototype.wh = null;
@@ -280,8 +288,14 @@
   };
 
   Parallax.prototype.updateDimensions = function() {
-    this.ww = window.top.innerWidth;
-    this.wh = window.top.innerHeight;
+    if (this.inIframe()) {
+        this.ww = window.top.innerWidth;
+        this.wh = window.top.innerHeight;
+    }else {
+        this.ww = window.innerWidth;
+        this.wh = window.innerHeight;        
+    }
+
     this.wcx = this.ww * this.originX;
     this.wcy = this.wh * this.originY;
     this.wrx = Math.max(this.wcx, this.ww - this.wcx);
@@ -289,7 +303,12 @@
   };
 
   Parallax.prototype.updateBounds = function() {
-    this.bounds = window.frameElement ? window.frameElement.getBoundingClientRect() : this.element.getBoundingClientRect();
+    if (this.inIframe()) {
+        this.bounds = window.frameElement.getBoundingClientRect();
+    }else {
+        this.bounds = this.element.getBoundingClientRect();
+    }
+
     this.ex = this.bounds.left;
     this.ey = this.bounds.top;
     this.ew = this.bounds.width;
@@ -318,7 +337,12 @@
         this.portrait = false;
         window.addEventListener('mousemove', this.onMouseMove);
       }
-      window.top.addEventListener('resize', this.onWindowResize);
+      if (this.inIframe()) {
+          window.top.addEventListener('resize', this.onWindowResize);
+      }else {
+          window.addEventListener('resize', this.onWindowResize);
+      }
+      
       this.raf = nextFrame(this.onAnimationFrame);
     }
   };
@@ -331,7 +355,11 @@
       } else {
         window.removeEventListener('mousemove', this.onMouseMove);
       }
-      window.top.removeEventListener('resize', this.onWindowResize);
+      if (this.inIframe()) {
+          window.top.removeEventListener('resize', this.onWindowResize);
+      }else {
+          window.removeEventListener('resize', this.onWindowResize);
+      }
       cancelFrame(this.raf);
     }
   };
@@ -463,14 +491,14 @@
 
     // Validate environment and event properties.
     if (!this.desktop && event.beta !== null && event.gamma !== null) {
-
+    
       // Set orientation status.
       this.orientationStatus = 1;
 
       // Extract Rotation
       var x = (event.beta  || 0) / MAGIC_NUMBER; //  -90 :: 90
       var y = (event.gamma || 0) / MAGIC_NUMBER; // -180 :: 180
-
+      //console.log(event.gamma);
       // Detect Orientation Change
       var portrait = this.wh > this.ww;
       if (this.portrait !== portrait) {
@@ -544,7 +572,7 @@
     function polyfillRequest(callback, element) {
         var currTime = new Date().getTime();
         var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-        var id = window.setTimeout(function() { callback(currTime + timeToCall); }, timeToCall);
+        var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 1000);
         lastTime = currTime + timeToCall;
         return id;
     }
