@@ -193,7 +193,15 @@
     }
     return featureSupport;
   };
-
+  
+  Parallax.prototype.inIframe = function() {
+      try {
+          return window.self !== window.top;
+      } catch (e) {
+          return true;
+      }
+  };
+  
   Plugin.prototype.ww = null;
   Plugin.prototype.wh = null;
   Plugin.prototype.wcx = null;
@@ -256,8 +264,14 @@
   };
 
   Plugin.prototype.updateDimensions = function() {
-    this.ww = window.top.innerWidth;
-    this.wh = window.top.innerHeight;
+    if (this.inIframe()) {
+      this.ww = window.top.innerWidth;
+      this.wh = window.top.innerHeight;
+    }else {
+      this.ww = window.innerWidth;
+      this.wh = window.innerHeight;        
+    }
+
     this.wcx = this.ww * this.originX;
     this.wcy = this.wh * this.originY;
     this.wrx = Math.max(this.wcx, this.ww - this.wcx);
@@ -265,7 +279,12 @@
   };
 
   Plugin.prototype.updateBounds = function() {
-    this.bounds = window.frameElement ? window.frameElement.getBoundingClientRect() : this.element.getBoundingClientRect();
+    if (this.inIframe()) {
+      this.bounds = window.frameElement.getBoundingClientRect();
+    }else {
+      this.bounds = this.element.getBoundingClientRect();
+    }
+
     this.ex = this.bounds.left;
     this.ey = this.bounds.top;
     this.ew = this.bounds.width;
@@ -294,7 +313,12 @@
         this.portrait = false;
         window.addEventListener('mousemove', this.onMouseMove);
       }
-      window.top.addEventListener('resize', this.onWindowResize);
+      if (this.inIframe()) {
+          window.top.addEventListener('resize', this.onWindowResize);
+      }else {
+          window.addEventListener('resize', this.onWindowResize);
+      }
+      
       this.raf = nextFrame(this.onAnimationFrame);
     }
   };
@@ -307,7 +331,11 @@
       } else {
         window.removeEventListener('mousemove', this.onMouseMove);
       }
-      window.top.removeEventListener('resize', this.onWindowResize);
+      if (this.inIframe()) {
+          window.top.removeEventListener('resize', this.onWindowResize);
+      }else {
+          window.removeEventListener('resize', this.onWindowResize);
+      }
       cancelFrame(this.raf);
     }
   };
@@ -547,7 +575,7 @@
     function polyfillRequest(callback, element) {
         var currTime = new Date().getTime();
         var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-        var id = window.setTimeout(function() { callback(currTime + timeToCall); }, timeToCall);
+        var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 1000);
         lastTime = currTime + timeToCall;
         return id;
     }
